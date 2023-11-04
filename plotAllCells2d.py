@@ -15,7 +15,7 @@ plt.gca().set_prop_cycle(color=[cmap(i) for i in np.linspace(0, 1, len(os.listdi
 fig, ax = plt.subplots()
 
 # List of desired depths as integers
-desired_depths = [2, 4, 5]
+desired_depths = [2, 3, 4]
 
 # Iterate over files in the folder
 for filename in os.listdir(folder_path):

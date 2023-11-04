@@ -1,36 +1,46 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Load data from the file
-file_path = 'data/KBA.XY'
-data = np.loadtxt(file_path)
+# Initialize variables to store data
+contours = []
+current_contour = []
 
-# Separate X, Y, and ID columns
-X = data[:, 0]
-Y = data[:, 1]
-ID = data[:, 2]
+# Read the data from the file and process it
+with open("data/GAJ.XY", "r") as file:
+    for line in file:
+        line = line.strip()
+        if line:
+            x, y, depth = map(float, line.split())
+            current_contour.append((x, y, depth))
+        else:
+            if current_contour:
+                contours.append(current_contour)
+            current_contour = []
 
-# Find unique IDs
-unique_ids = np.unique(ID)
+# Create a dictionary to store contours by depth
+contours_by_depth = {}
+for contour in contours:
+    depth = contour[0][2]  # Depth of the contour
+    if depth not in contours_by_depth:
+        contours_by_depth[depth] = []
+    contours_by_depth[depth].append(contour)
 
-# Create a color map for different contours
-cmap = plt.get_cmap('viridis')
+# Plot the contours with different colors and labels
+colors = plt.cm.viridis(np.linspace(0, 1, len(contours_by_depth)))
+legend_labels = set()
+for depth, color in zip(contours_by_depth, colors):
+    for contour in contours_by_depth[depth]:
+        contour = np.array(contour)
+        plt.plot(contour[:, 0], contour[:, 1], color=color, label=f"Depth {depth}")
+        legend_labels.add(f"Depth {depth}")
 
-# Create a figure and axis for the plot
-fig, ax = plt.subplots()
+# Add a legend with distinct depth entries
+plt.legend(labels=legend_labels)
 
-# Plot each contour
-for i, unique_id in enumerate(unique_ids):
-    mask = (ID == unique_id)
-    x_contour = X[mask]
-    y_contour = Y[mask]
-    color = cmap(i / len(unique_ids))  # Assign a color based on the contour number
-    ax.plot(x_contour, y_contour, label=f'Contour {unique_id}', color=color)
-
-# Set labels and legend
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.legend()
+# Set labels and title
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Contour Plots')
 
 # Show the plot
 plt.show()
