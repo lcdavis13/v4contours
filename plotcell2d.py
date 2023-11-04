@@ -30,15 +30,15 @@ depths_to_plot = [2.0, 3.0, 4.0, 5.0]
 
 # Plot the contours with different colors and labels for specified depths
 colors = plt.cm.viridis(np.linspace(0, 1, len(depths_to_plot)))
-legend_labels = set()
+legend_handles = []
 for depth, color in zip(depths_to_plot, colors):
     for contour in contours_by_depth[depth]:
         contour = np.array(contour)
-        plt.plot(contour[:, 0], contour[:, 1], color=color, label=f"Depth {depth}")
-        legend_labels.add(f"Depth {depth}")
+        line, = plt.plot(contour[:, 0], contour[:, 1], color=color)
+    legend_handles.append(line)
 
-# Add a legend with distinct depth entries
-plt.legend(labels=legend_labels)
+# Add a custom legend with the appropriate colors
+plt.legend(legend_handles, [f"Depth {depth}" for depth in depths_to_plot])
 
 # Set labels and title
 plt.xlabel('X')
