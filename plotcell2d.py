@@ -25,10 +25,13 @@ for contour in contours:
         contours_by_depth[depth] = []
     contours_by_depth[depth].append(contour)
 
-# Plot the contours with different colors and labels
-colors = plt.cm.viridis(np.linspace(0, 1, len(contours_by_depth)))
+# Specify the depths you want to filter and plot
+depths_to_plot = [2.0, 3.0, 4.0, 5.0]
+
+# Plot the contours with different colors and labels for specified depths
+colors = plt.cm.viridis(np.linspace(0, 1, len(depths_to_plot)))
 legend_labels = set()
-for depth, color in zip(contours_by_depth, colors):
+for depth, color in zip(depths_to_plot, colors):
     for contour in contours_by_depth[depth]:
         contour = np.array(contour)
         plt.plot(contour[:, 0], contour[:, 1], color=color, label=f"Depth {depth}")
