@@ -58,7 +58,7 @@ def plot_file(file_path, depths_to_plot, legend_handles):
     contours = read_contours_from_file(file_path)
     contours_by_depth = organize_contours_by_depth(contours)
     
-    plot_contours_with_depths(contours_by_depth, depths_to_plot, legend_handles)
+    #plot_contours_with_depths(contours_by_depth, depths_to_plot, legend_handles)
     plot_contour_centers(contours_by_depth, [8.0], legend_handles)
     
     
@@ -78,10 +78,12 @@ def show_plots(legend_handles, depths_to_plot):
 
 
 if __name__ == "__main__":
-    depths_to_plot = [5.0, 6.0, 7.0, 8.0]
+    depths_to_plot = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
     legend_handles = []
     
+    #plot_file('data/JDK.XY', depths_to_plot, legend_handles)
     plot_all_files('data', '.XY', depths_to_plot, legend_handles)
 
     show_plots(legend_handles, depths_to_plot)
     
+    # ToDo use two legends, one for linestyle (depth) and one for color (cell): https://stackoverflow.com/questions/12761806/matplotlib-2-different-legends-on-same-graph
