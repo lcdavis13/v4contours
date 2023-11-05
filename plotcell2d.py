@@ -1,3 +1,6 @@
+import math
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -31,16 +34,40 @@ def organize_contours_by_depth(contours):
 def plot_contours_with_depths(contours_by_depth, depths_to_plot, legend_handles):
     colors = plt.cm.viridis(np.linspace(0, 1, len(depths_to_plot)))
     for depth, color in zip(depths_to_plot, colors):
-        for contour in contours_by_depth[depth]:
-            contour = np.array(contour)
-            line, = plt.plot(contour[:, 0], contour[:, 1], color=color, ls=(0, (5, 20.0/depth)))
-        legend_handles.append(line)
+        contours_at_depth = contours_by_depth.get(depth, [])
+        if contours_at_depth:
+            for contour in contours_at_depth:
+                contour = np.array(contour)
+                linewidth = 5.0*math.log(depth)
+                gapwidth = 5.0/math.log(depth)
+                line, = plt.plot(contour[:, 0], contour[:, 1], color=color, ls=(0, (linewidth, gapwidth)))
+            legend_handles.append(line)
+        
+def plot_contour_centers(contours_by_depth, depths_to_plot, legend_handles):
+    colors = plt.cm.viridis(np.linspace(0, 1, len(depths_to_plot)))
+    for depth, color in zip(depths_to_plot, colors):
+        contours_at_depth = contours_by_depth.get(depth, [])
+        if contours_at_depth:
+            for contour in contours_by_depth[depth]:
+                contour = np.array(contour)
+                center = np.mean(contour[:, 0:2], axis=0)
+                line, = plt.plot(center[0], center[1], color=color, marker='o')
+            legend_handles.append(line)
 
 def plot_file(file_path, depths_to_plot, legend_handles):
     contours = read_contours_from_file(file_path)
     contours_by_depth = organize_contours_by_depth(contours)
     
     plot_contours_with_depths(contours_by_depth, depths_to_plot, legend_handles)
+    plot_contour_centers(contours_by_depth, [8.0], legend_handles)
+    
+    
+def plot_all_files(folder_path, ext, depths_to_plot, legend_handles):
+    for filename in os.listdir(folder_path):
+        if filename.endswith(ext):
+            file_path = os.path.join(folder_path, filename)
+            plot_file(file_path, depths_to_plot, legend_handles)
+
     
 def show_plots(legend_handles, depths_to_plot):
     plt.legend(legend_handles, [f"Depth {depth}" for depth in depths_to_plot])
@@ -51,11 +78,10 @@ def show_plots(legend_handles, depths_to_plot):
 
 
 if __name__ == "__main__":
-    depths_to_plot = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+    depths_to_plot = [5.0, 6.0, 7.0, 8.0]
     legend_handles = []
     
-    plot_file("data/GBE.XY", depths_to_plot, legend_handles)
-    plot_file("data/GAJ.XY", depths_to_plot, legend_handles)
+    plot_all_files('data', '.XY', depths_to_plot, legend_handles)
 
     show_plots(legend_handles, depths_to_plot)
     
