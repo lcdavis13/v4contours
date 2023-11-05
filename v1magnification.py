@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import integrate
+from scipy import optimize
+
 
 # Define a function to convert polar coordinates to Euclidean coordinates
 def polar_to_euclidean(r, theta):
@@ -36,11 +39,12 @@ def Convert(w_deg):
     r_rad = M_rad(w_rad)*np.sin(w_rad)
     
     # Deg and rad versions of M equations (given to me by Dr. Motter) are surprisingly a bit different curves
-    
+
+    z = integrate.quad(lambda w: math.sqrt(M_rad(w)**2 - optimize.approx_fprime(dr/dw)**2), 0, w_rad)
     
     #x = np.cos(np.radians(w))
     #y = np.sin(np.radians(w))
-    return w_rad, r_rad
+    return z, r_rad
 
 # Create lists to store the x and y coordinates of the points on the unit circle using the custom function
 x_custom = [Convert(theta)[0] for theta in angles]
