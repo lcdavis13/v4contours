@@ -64,7 +64,7 @@ def plot_file(file_path, depths_to_plot, legend_handles):
     
 def plot_all_files(folder_path, ext, depths_to_plot, legend_handles):
     for filename in os.listdir(folder_path):
-        if filename.endswith(ext):
+        if filename.endswith(ext):#  and (filename.startswith('Q') or filename.startswith('R') or filename.startswith('S')):
             file_path = os.path.join(folder_path, filename)
             plot_file(file_path, depths_to_plot, legend_handles)
 
@@ -87,3 +87,4 @@ if __name__ == "__main__":
     show_plots(legend_handles, depths_to_plot)
     
     # ToDo use two legends, one for linestyle (depth) and one for color (cell): https://stackoverflow.com/questions/12761806/matplotlib-2-different-legends-on-same-graph
+    # ToDo if centroid is on right of y axis, mirror the contour
