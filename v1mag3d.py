@@ -1,10 +1,13 @@
 import math
 
+import plotly.express
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 import numpy as np
 
 
 def getV1Mag2D(dtheta = math.pi/180.0):
+    #angles = np.multiply([0.0, 1.0, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 89.0], math.pi/180.0)
     angles = np.arange(0.0, math.pi / 2.0, dtheta)
     
     def calc_m(w):
@@ -43,38 +46,82 @@ def Rx(theta):
                       [0, math.cos(theta), -math.sin(theta)],
                       [0, math.sin(theta), math.cos(theta)]])
 
-
-def Ry(theta):
-    return np.matrix([[math.cos(theta), 0, math.sin(theta)],
-                      [0, 1, 0],
-                      [-math.sin(theta), 0, math.cos(theta)]])
-
-
-def Rz(theta):
-    return np.matrix([[math.cos(theta), -math.sin(theta), 0],
-                      [math.sin(theta), math.cos(theta), 0],
-                      [0, 0, 1]])
-
-
-def getV1Mag3D(curve2d, dphi = math.pi/10.0):
-    angles = np.arange(0.0, math.pi * 2.0, dphi)
-    
-    ptcloud = np.empty((0, 3), dtype=np.float32)
-    for phi in angles:
-        pts = curve2d.copy()
-        #scipy.spatial.transformath.Rotation.from_euler('x', phi, degrees=False).as_matrix()
-        transform_matrix = Rx(phi)
-        pts_dot = pts.dot(transform_matrix.T)
-        #pts_rot = np.ndarray(pts_dot)
-        ptcloud = np.concatenate((ptcloud, pts_dot))
-    
-    return ptcloud
     
 
 curve = getV1Mag2D()
-pts = getV1Mag3D(curve)
 
-x, y, z = pts.T
+def rotate_around_x_axis(points, num_rotations):
+    """
+    Rotate a list of 3D points around the X-axis multiple times.
 
-fig = go.Figure(data=[go.Mesh3d(x=x[0], y=y[0], z=z[0], color='lightpink', opacity=0.50)])
-fig.show()
+    Parameters:
+    - points (list of tuples): List of 3D points (x, y, z).
+    - num_rotations (int): Number of rotations around the X-axis.
+
+    Returns:
+    - list of list of tuples: List of rotated curves.
+    """
+    points = np.array(points)
+    rotated_curves = []
+
+    for rotation in range(num_rotations):
+        # Define rotation matrix around X-axis
+        theta = 2 * np.pi * rotation / num_rotations
+        rotation_matrix = Rx(theta)
+
+        # Apply rotation to points
+        rotated_points = np.dot(points, rotation_matrix.T)
+        rotated_curves.append(rotated_points.tolist())
+
+    return rotated_curves
+
+def plot_rotated_curves(rotated_curves):
+    """
+    Plot rotated curves using Plotly.
+
+    Parameters:
+    - rotated_curves (list of list of tuples): List of rotated curves.
+    """
+    fig = go.Figure()
+
+    for curve in rotated_curves:
+        x, y, z = zip(*curve)
+        fig.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='lines'))
+
+    fig.update_layout(scene=dict(aspectmode="data"))
+    fig.write_html("titleString" + "plot.html", auto_open=True)
+    
+num_rotations = 8
+
+rotated_curves = rotate_around_x_axis(curve, num_rotations)
+plot_rotated_curves(rotated_curves)
+
+def create_mesh(rotated_curves):
+    """
+    Create a mesh from the triangulation of rotated curves.
+
+    Parameters:
+    - rotated_curves (list of list of tuples): List of rotated curves.
+
+    Returns:
+    - plotly.graph_objects.Figure: Plotly figure displaying the mesh.
+    """
+    vertices = np.concatenate(rotated_curves, axis=0)
+
+    # Create triangulation
+    num_points_per_curve = len(rotated_curves[0])
+    faces = []
+    for i in range(len(rotated_curves) - 1):
+        next_i = (i + 1) % len(rotated_curves)
+        for j in range(num_points_per_curve - 1):
+            current = i * num_points_per_curve + j
+            next_row = next_i * num_points_per_curve + j
+            faces.extend([[current, current + 1, next_row], [current + 1, next_row + 1, next_row]])
+
+    mesh = go.Figure(ff.create_trisurf(x=vertices[:, 0], y=vertices[:, 1], z=vertices[:, 2], simplices=faces))
+    mesh.update_layout(scene=dict(aspectmode="data"))
+    return mesh
+
+mesh_fig = create_mesh(rotated_curves)
+mesh_fig.write_html("titleString3D" + "plot.html", auto_open=True)
+
