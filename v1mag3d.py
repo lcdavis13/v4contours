@@ -89,7 +89,7 @@ def plot_rotated_curves(rotated_curves):
         fig.add_trace(go.Scatter3d(x=x, y=y, z=z, mode='lines'))
 
     fig.update_layout(scene=dict(aspectmode="data"))
-    fig.write_html("titleString" + "plot.html", auto_open=True)
+    fig.write_html("renders/v1magCurves.html", auto_open=True)
     
 num_rotations = 8
 
@@ -123,5 +123,5 @@ def create_mesh(rotated_curves):
     return mesh
 
 mesh_fig = create_mesh(rotated_curves)
-mesh_fig.write_html("titleString3D" + "plot.html", auto_open=True)
+mesh_fig.write_html("renders/v1magMesh.html", auto_open=True)
 
