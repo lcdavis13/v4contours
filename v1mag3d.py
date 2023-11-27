@@ -171,10 +171,10 @@ def contours_to_3d(contours):
             points_polar.append([r, theta])
 
     points_r0 = np.array(points_polar)[:, 0]
-    points_rz = transformEyeAngleToV1(points_r0)
-    x, y = convert_to_euclidean(np.array(points_rz)[:, 0], np.array(points_polar)[:, 1])
+    points_zr = transformEyeAngleToV1(points_r0)
+    x, y = convert_to_euclidean(np.array(points_zr)[:, 1], np.array(points_polar)[:, 1])
 
-    points_3d = [x, y, np.array(points_rz)[:, 1]]
+    points_3d = [x, y, np.array(points_zr)[:, 0]]
 
     return points_3d
 
