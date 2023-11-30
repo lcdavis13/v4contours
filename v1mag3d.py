@@ -19,6 +19,7 @@ def transformEyeAngleToV1(angles):
     # PROBLEM FROM THIS POINT FORWARD
     # I'm computing the integral and derivative using assumptions about the series of points, which holds only for generating the outline mesh.
     # I need a local approximation of derivative and a dynamic integral to convert standalone points such as those in the RFs.
+    # Alternative:
 
     def calc_delta_z(m, r, dtheta):
         dr_dw = np.diff(r) / dtheta  # w is theta; dw is dtheta

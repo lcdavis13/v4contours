@@ -99,7 +99,7 @@ if __name__ == "__main__":
     legend_handles = []
     
     #plot_file('data/JDK.XY', depths_to_plot, legend_handles)
-    plot_all_files('data', '.XY', depths_to_plot, legend_handles, plot_mirrors_too=False)
+    plot_all_files('data_rotated', '.XY', depths_to_plot, legend_handles, plot_mirrors_too=False)
     add_target_rings(10)
 
     show_plots(legend_handles, depths_to_plot)
