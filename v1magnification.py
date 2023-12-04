@@ -2,8 +2,19 @@ import math
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from scipy import integrate
 from scipy import optimize
+
+
+
+def calc_m(w):
+    # return 716.197 / (71.6197 + w) # radians version from Brad
+    # return 10 / (0.8 + w)  # degrees version from Brad
+    return 525.6 / (1.0 + 33.48*w)  # 1984 radians version
+
+def get_increment_angle(w, dm):
+    return dm/calc_m(w)
 
 
 # Define a function to convert polar coordinates to Euclidean coordinates
@@ -13,45 +24,52 @@ def polar_to_euclidean(r, theta):
     return x, y
 
 # Create an array of angles from 0 to 90 degrees
-dtheta = math.pi/180.0
-angles = np.arange(0.0, math.pi/2.0, dtheta)
+#dtheta = math.pi/180.0/10.0
+#angles = np.arange(0.0, math.pi/2.0, dtheta)
+
+dm = 0.3
+angles = [0.0]
+while angles[-1] < math.pi/2.0:
+    angles.append(angles[-1] + get_increment_angle(angles[-1], dm))
+angles = np.array(angles)
+
+print(len(angles))
 
 # Create lists to store the x and y coordinates of the points on the unit circle
 circle_x = np.array([np.cos(theta) for theta in angles])
 circle_y = np.array([np.sin(theta) for theta in angles])
 
 # List of specific angles to plot points at
-dot_ids = [0, 1, 2, 5, 10, 20, 40, 60, 80, 89]
-colors = ["black", "red", "blue", "magenta", "cyan", "red", "blue", "magenta", "cyan", "black"]
-
-
-
-def calc_m(w):
-    # return 716.197 / (71.6197 + w) # radians version from Brad
-    # return 10 / (0.8 + w)  # degrees version from Brad
-    return 525.6 / (1.0 + 33.48*w)  # 1984 radians version
+dot_ids = [0, 1, 2, 3]
+colors = ["black", "red", "blue", "magenta"]#, "cyan", "red", "blue", "magenta", "cyan", "black"]
 
 # Define an undefined custom function to convert polar coordinates to Euclidean coordinates
 def calc_r(w, m):
     return m * np.sin(w)
     # might need to ensure these are zero when w is zero
 
-def calc_delta_z(m, r):
-    dr_dw = np.diff(r)/dtheta  # w is theta; dw is dtheta
-    dr_dw = np.append(dr_dw, dr_dw[-1]) # diff loses one element, duplicate last derivative to preserve length
+def calc_z(m, r):
+    dw = np.diff(angles)
+    dw = np.append(dw, dw[-1])
+    
+    dr = np.diff(r)
+    dr = np.append(dr, dr[-1])
+    
+    dr_dw = dr/dw
     m_sqr = np.square(m)
     dr_dw_sqr = np.square(dr_dw)
     sqr_dif = np.subtract(m_sqr, dr_dw_sqr)
-    return np.sqrt(sqr_dif)
-
-# Define an undefined custom function to convert polar coordinates to Euclidean coordinates
-def calc_z(delta_z):
-    return np.cumsum(delta_z)*dtheta
+    dz = np.sqrt(sqr_dif)
+    
+    return np.cumsum(dz*dw)
 
 m = calc_m(angles)
 r = calc_r(angles, m)
-delta_z = calc_delta_z(m, r)
-z = calc_z(delta_z)
+z = calc_z(m, r)
+
+df = pd.DataFrame(list(zip(angles, r, z)), columns = ['phi', 'r', 'z'])
+df.to_json('v1mag.json', orient='records', lines=True)
+df.to_csv('v1mag.csv', index=False)
 
 
 # Circle
@@ -96,16 +114,16 @@ plt.xlabel('angle (w) (radians)')
 plt.ylabel('v1 lateral distance (r)')
 #plt.axis('equal')
 plt.grid()
-
-# dz/dw
-plt.subplot(325)
-plt.plot(angles, delta_z)
-plt.scatter(angles[dot_ids], delta_z[dot_ids], c=colors, marker='o', label='Specific Points')
-plt.title('v1 axial rate of change w.r.t. Angle (debug view)')
-plt.xlabel('angle (w) (radians)')
-plt.ylabel('v1 axial rate (dz/dw)')
-#plt.axis('equal')
-plt.grid()
+#
+# # dz/dw
+# plt.subplot(325)
+# plt.plot(angles, delta_z)
+# plt.scatter(angles[dot_ids], delta_z[dot_ids], c=colors, marker='o', label='Specific Points')
+# plt.title('v1 axial rate of change w.r.t. Angle (debug view)')
+# plt.xlabel('angle (w) (radians)')
+# plt.ylabel('v1 axial rate (dz/dw)')
+# #plt.axis('equal')
+# plt.grid()
 
 # z
 plt.subplot(326)
